@@ -44,17 +44,18 @@ f2.write(str(R)+ '\n')
 
 # The movement processes are organized into a list of n-lists. Each n-list denotes a movement step.
 # That is, each point in the first sub-list of the n-list moves to the points in the second sub-list, and so on.
-# Ex: [(0,0), (3,0), (5,0)], [(1,0), (2,0), (6,0)] means that (0,0) moves to (1,0), (3,0) to (2,0), and so on.
+# Ex: [(0,0), (3,0), (5,0)], [(1,0), (2,0), (6,0)] means that (0,0) moves to (1,0), and (3,0) to (2,0), and so on.
 # The length of the sub-lists can be arbitrary, but each sub-lists should contain the same number of points.
 # Also, the number of steps contained in a process_list is also arbitrary.
-# process_list = [ [ [(0,0), (3,0), (5,0)], [(1,0), (2,0), (6,0)], [(1,1), (2,1), (6,1)]],
-                 # [ [(2,0), (2,1), (2,2)], [(0,0), (0,1), (0,2)]],
-                 # [ [(2,0), (2,1), (2,2)], [(2,0), (2,1), (2,2)]],
-                 # [ [(0,0)], [(0,1)], [(0,2)] ] ]
-process_list = [ [ [(0,0), (1,0), (2,0), (3,0)], [(0,0), (1,0), (2,0), (3,0)]]]
+process_list = [ [ [(0,0), (3,0), (5,0)], [(1,0), (2,0), (6,0)], [(1,1), (2,1), (6,1)]],
+                 [ [(2,0), (2,1), (2,2)], [(0,0), (0,1), (0,2)]],
+                 [ [(2,0), (2,1), (2,2)], [(2,0), (2,1), (2,2)]],
+                 [ [(0,0)], [(0,1)], [(0,2)] ] ]
+# process_list = [ [ [(0,0), (1,0), (2,0), (3,0)], [(0,0), (1,0), (2,0), (3,0)]]]
 #process_list = [ [ [(0,0), (1,0), (2,0), (3,0)], [(1,0), (2,0), (3,0), (5,0)]]]
 #process_list = [ [ [(0,0)], [(0,0)]]]
 
+# What is this?
 for steps_list in process_list:
     if len(steps_list[0]) > 1: # move more than one point in this step list
         for p1, p2 in zip(steps_list, steps_list[1:]):
