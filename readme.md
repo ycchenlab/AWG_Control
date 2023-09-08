@@ -35,7 +35,7 @@ Also note that a file overview is included in each file listed above for the use
     * The rest of the functions are used in "generate_freq_list_20220505.py" to generate the frequency list file from the user specified parameters and movement steps (in corredinate form).
 
 
-    > Note that the files: <mark>spcm_tools.py, pyspcm.py, regs.py, and spcerr.py</mark> are setup files provided by the AWG manufacturer. These files <mark>should not be changed without necessary purposes</mark>.
+> Note that the files: <mark>spcm_tools.py, pyspcm.py, regs.py, and spcerr.py</mark> are setup files provided by the AWG manufacturer. These files <mark>should not be changed without necessary purposes</mark>.
 
 
 ### 4. moving_algorithm_2022_may.ipynb

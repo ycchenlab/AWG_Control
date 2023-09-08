@@ -3,45 +3,44 @@ import math
 import numpy as np
 from scipy.interpolate import CubicSpline
 
-def read_setup_from_txt(file_path): # for cubic interpolation
+def read_setup_from_txt(file_path):  # for cubic interpolation
     
-    # This function reads in a .txt file containing the procedures (frequencies, relative amp and phase, duration) 
-    # that describe the RF signal for the 2D AOD to complete the pre-determined movement process
-    
-    # The txt file for setup should contain the following information in the following order:
-    # Line 1 of the .txt file: Sampling frequency in MHz. For this board (M4i.6622-x8), 50 MHz < sampling frequency < 625 MHz
-    
-    # The subsequent lines are grouped into sets of 3 lines.
-    # The first and second lines contain two sets of frequencies of equal number along with their relative amplitudes and phases. 
-    # The number of frequencies listed denotes the number of freqency components in the output RF signal.
-    # The i-th output signal frequency will change from the i-th freq in Line 1 into the i-th freq in Line 2.
-    # This frequency transition follows a cubic interpolation frequency curve, and the duration is listed in Line 3.
-    # The detailed explanation of each line is as follows:
-    # Line 1: This line contains number of frequencies, frequency components (in MHz), relative amplitude, relative phase (in radian)
-    #         The data in this line is organized as follows (n denotes the number of frequencies):
-    #         n, n nums denoting the n frequencies, n nums denoting the relative amp, n nums denoting the relative phase
-    #         Note that the numbers are separated by a whitespace.
-    #         Also note that the relative amplitude may be any positive number. What matters is the relative amplitude.
-    #     Ex: 3 75.000 76.000 77.000 1 1 1 0 0.5 1
-    # Line 2: This line contains the ending frequencies for the movement
-    #     Ex: 3 77.000 78.000 79.000
-    # Line 3: This line contains the time for this step (frequency transition) in us (microsecond)
-    #     Ex: 6000
+    '''This function reads in a .txt file containing the procedures (frequencies, relative amp and phase, duration)
+    that describe the RF signal for the 2D AOD to complete the pre-determined movement process
+
+    The txt file for setup should contain the following information in the following order:
+    Line 1 of the .txt file: Sampling frequency in MHz. For this board (M4i.6622-x8), 50 MHz < sampling frequency < 625 MHz
+
+    The subsequent lines are grouped into sets of 3 lines.
+    The first and second lines contain two sets of frequencies of equal number along with their relative amplitudes and phases.
+    The number of frequencies listed denotes the number of frequency components in the output RF signal.
+    The i-th output signal frequency will change from the i-th freq in Line 1 into the i-th freq in Line 2.
+    This frequency transition follows a cubic interpolation frequency curve, and the duration is listed in Line 3.
+    The detailed explanation of each line is as follows:
+    Line 1: This line contains number of frequencies, frequency components (in MHz), relative amplitude, relative phase (in radian)
+            The data in this line is organized as follows (n denotes the number of frequencies):
+            n, n nums denoting the n frequencies, n nums denoting the relative amp, n nums denoting the relative phase
+            Note that the numbers are separated by a whitespace.
+            Also note that the relative amplitude may be any positive number. What matters is the relative amplitude.
+        Ex: 3 75.000 76.000 77.000 1 1 1 0 0.5 1
+    Line 2: This line contains the ending frequencies for the movement
+        Ex: 3 77.000 78.000 79.000
+    Line 3: This line contains the time for this step (frequency transition) in us (microsecond)
+        Ex: 6000'''
 
     freq_list_1 = []
     freq_list_2 = []
     time_list = []
     amp_list = []
     phase_list = []
-    time = 0 # the duration of the whole operation
+    time = 0  # the duration of the whole operation
     with open(file_path) as f:
         R = int(f.readline())
         while True:
-            f1 = f.readline().strip().split()
-            f2 = f.readline().strip().split()
-            t  = f.readline().strip()
+            f1 = f.readline().strip().split()  # extract the initial frequnecy of sub-process
+            f2 = f.readline().strip().split()  # extract the final frequency of sub-process
+            t  = f.readline().strip() # extract the duration of sub-process
             if not t: break #EOF
-            #print(f1)
             num_freq = int(f1[0])
             a1 = [float(f1[num_freq + 1 + i]) for i in range(num_freq)]
             amp = [a/sum(a1) for a in a1] # assume that the relative strength does not change for f1, f2
