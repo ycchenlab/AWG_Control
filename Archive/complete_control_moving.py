@@ -7,9 +7,9 @@
 # This program handles the communication with the Spectrum Instrument AWG to output the desired RF signal
 # to drive the 2D-AOD. The information of the signal waveform is input to the program as an external .txt file.
 # In the future, the user may choose to integrate this program into some larger program that also generates the 
-# required waveform information. In that case, the user may consider changing the data input to be some Python datatypes
+# required waveform information. In that case, the user may consider changing the Data input to be some Python datatypes
 # directly, instead of writing it to a .txt file and read it out again, which might take some additional time. 
-# The current operation mode is cyclic replay. That is, after the data is finished being played, the program will
+# The current operation mode is cyclic replay. That is, after the Data is finished being played, the program will
 # replay the whole waveform (for both channels) over and over again until the user hit esc to terminate the program.
 # If the user wants to modify how many times the signal waveform will be replayed, he or she may set llLoops to the desired value
 # 
@@ -79,7 +79,7 @@ total_sample_L = R * time
 mem_size = 32 * ( 1 + (total_sample_L // 32)) # the smallest unit of buffer sample points is 32
 
 # setup the mode
-llMemSamples = int64 (mem_size) ## buffer length in number of data points
+llMemSamples = int64 (mem_size) ## buffer length in number of Data points
 llLoops = int64 (0) # number of loops, 0 means continuously (replay mode)
 spcm_dwSetParam_i32 (hCard, SPC_CARDMODE,    SPC_REP_STD_SINGLE)
 spcm_dwSetParam_i64 (hCard, SPC_CHENABLE,    CHANNEL0 | CHANNEL1) # change here to output on two channels
@@ -124,7 +124,7 @@ else:
     sys.stdout.write("Using buffer allocated by user program\n")
 
 sys.stdout.write("llMemSamples: {0:d}\n".format(llMemSamples.value))
-# calculate the data
+# calculate the Data
 pnBuffer = cast  (pvBuffer, ptr16)
 lMaxADCValue = int32 (0)
 spcm_dwGetParam_i32 (hCard, SPC_MIINST_MAXADCVALUE, byref (lMaxADCValue))
@@ -153,7 +153,7 @@ for f1, f2, time, amp, phase in zip(freq_list_1, freq_list_1_2, time_list, amp_l
                                                 + phase[j])
         pnBuffer[2*i] = int16 (int(dwFShalf.value * signal))   
     L_sum = L_sum + L
-# after the loop is complete, L_sum contains the number of data points for channel 0's output
+# after the loop is complete, L_sum contains the number of Data points for channel 0's output
 print(L_sum)
 
 L_sum_2 = 0
@@ -176,7 +176,7 @@ for f1, f2, time, amp, phase in zip(freq_list_2, freq_list_2_2, time_list_2, amp
                                                 + phase[j])
         pnBuffer[2*i+1] = int16 (int(dwFShalf.value * signal))
     L_sum_2 = L_sum_2 + L   
-# after the loop is complete, L_sum_2 contains the number of data points for channel 1's output    
+# after the loop is complete, L_sum_2 contains the number of Data points for channel 1's output
 print(L_sum_2)
 
 # pad 0 to those unused memories in the buffer (since the buffer length has to be a multiple of 32)
@@ -184,10 +184,10 @@ for i in range(L_sum + L_sum_2, end_sample_length, 1):
     pnBuffer[i] = int16 (0)
 
 # we define the buffer for transfer and start the DMA transfer
-sys.stdout.write("Starting the DMA transfer and waiting until data is in board memory\n")
+sys.stdout.write("Starting the DMA transfer and waiting until Data is in board memory\n")
 spcm_dwDefTransfer_i64 (hCard, SPCM_BUF_DATA, SPCM_DIR_PCTOCARD, int32 (0), pvBuffer, uint64 (0), qwBufferSize)
 spcm_dwSetParam_i32 (hCard, SPC_M2CMD, M2CMD_DATA_STARTDMA | M2CMD_DATA_WAITDMA)
-sys.stdout.write("... data has been transferred to board memory\n")
+sys.stdout.write("... Data has been transferred to board memory\n")
 
 dwError = spcm_dwSetParam_i32 (hCard, SPC_M2CMD, M2CMD_CARD_START | M2CMD_CARD_ENABLETRIGGER) 
 if dwError != ERR_OK:

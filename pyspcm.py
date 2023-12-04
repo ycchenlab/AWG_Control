@@ -14,8 +14,8 @@ from spcerr import *
 SPCM_DIR_PCTOCARD = 0
 SPCM_DIR_CARDTOPC = 1
 
-SPCM_BUF_DATA      = 1000 # main data buffer for acquired or generated samples
-SPCM_BUF_ABA       = 2000 # buffer for ABA data, holds the A-DATA (slow samples)
+SPCM_BUF_DATA      = 1000 # main Data buffer for acquired or generated samples
+SPCM_BUF_ABA       = 2000 # buffer for ABA Data, holds the A-DATA (slow samples)
 SPCM_BUF_TIMESTAMP = 3000 # buffer for timestamps
 
 

@@ -1,0 +1,51 @@
+# # (khc) read in the required testing parameters from the .txt file
+#         txt_path = 'test_gen_mixed_freq_list_1_rel_phase.txt'
+#         txt_path_2 = 'test_gen_mixed_freq_list_2_rel_phase.txt'
+#         R, time, freq_list_1, freq_list_1_2, time_list, amp_list_1, phase_list_1 = read_setup_from_txt(txt_path)
+#         R2, time2, freq_list_2, freq_list_2_2, time_list_2, amp_list_2, phase_list_2 = read_setup_from_txt(txt_path_2)
+#
+#         L_sum = 0
+#         for f1, f2, time, amp, phase in zip(freq_list_1, freq_list_1_2, time_list, amp_list_1, phase_list_1):
+#             num_freq = len(f1)
+#             if max(f1) >= R/2 or max(f2) >= R/2:
+#                 print('ERROR: The input frequency has to be less than 1/2 * sampling rate.')
+#                 break
+#             L = R * time
+#             if (L_sum + L) >= end_sample_length:
+#                 print('Data Memory too small. Please allocate more memory.')
+#                 break
+#             interp_freq_list = []
+#             for i in range(num_freq):
+#                 interp_freq_list.append(cubic_interp_freq_list(R, time, f1[i], f2[i]))
+#             for i in range(L_sum, L_sum + L, 1):
+#                 signal = 0
+#                 for j in range(num_freq): # compute the sum of the different frequency components
+#                     signal = signal + amp[j] * math.sin(2 * math.pi * (i-L_sum) * interp_freq_list[j][i-L_sum] / R
+#                                                         + phase[j])
+#                 self.pnBuffer[2*i] = int16 (int(self.dwFShalf.value * signal))
+#             L_sum = L_sum + L
+#         # after the loop is complete, L_sum contains the number of data points for channel 0's output
+#         print(L_sum)
+#
+#         L_sum_2 = 0
+#         for f1, f2, time, amp, phase in zip(freq_list_2, freq_list_2_2, time_list_2, amp_list_2, phase_list_2):
+#             num_freq = len(f1)
+#             if max(f1) >= R2/2 or max(f2) >= R2/2:
+#                 print('ERROR: The input frequency has to be less than 1/2 * sampling rate.')
+#                 break
+#             L = R2 * time
+#             if (L_sum_2 + L) >= end_sample_length:
+#                 print('Data Memory too small. Please allocate more memory.')
+#                 break
+#             interp_freq_list = []
+#             for i in range(num_freq):
+#                 interp_freq_list.append(cubic_interp_freq_list(R2, time, f1[i], f2[i]))
+#             for i in range(L_sum_2, L_sum_2 + L, 1):
+#                 signal = 0
+#                 for j in range(num_freq): # compute the sum of the different frequency components
+#                     signal = signal + amp[j] * math.sin(2 * math.pi * (i-L_sum_2) * interp_freq_list[j][i-L_sum_2] / R2
+#                                                         + phase[j])
+#                 self.pnBuffer[2*i+1] = int16 (int(self.dwFShalf.value * signal))
+#             L_sum_2 = L_sum_2 + L
+#         # after the loop is complete, L_sum_2 contains the number of data points for channel 1's output
+#         print(L_sum_2)

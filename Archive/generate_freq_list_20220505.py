@@ -21,7 +21,7 @@ from aux_functions_20220504 import write_step_single_freq, write_step_multi_freq
 # The detailed explanation of each line is as follows:
 # Line 1: This line contains number of frequencies, frequency components (in MHz), relative amplitude, relative phase
 # (in radian)
-#         The data in this line is organized as follows (n denotes the number of frequencies):
+#         The Data in this line is organized as follows (n denotes the number of frequencies):
 #         n, n nums denoting the n frequencies, n nums denoting the relative amp, n nums denoting the relative phase
 #         Note that the numbers are separated by a whitespace.
 #         Also note that the relative amplitude may be any positive number. What matters is the relative amplitude.
