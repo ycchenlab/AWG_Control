@@ -18,24 +18,23 @@ Procedure:
 '''
 
 from static_trap import StaticTrap
+from IntOptFnc import *
 from complete_control_dev_class import AWG
+import cv2
 import os
 import sys
 import json
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
-import EasyPySpin
-import cv2
+
 from PIL import Image
 from datetime import datetime
 
 # 1
+# input params
 print('Welcome to intensity optimization program.')
 a_0 = float(input('Please enter the RF amplitude (recommended: 0.05 mv): '))
 phase_mode = input('Please enter the phase mode (zero/random/formula): ')
-print('===================================================')
-
 
 if a_0 >= 0.3:
     raise ValueError('Amplitude too large. May lead to AOD damage.')
@@ -43,8 +42,10 @@ if phase_mode not in ['zero', 'random', 'formula']:
     raise ValueError(f"{phase_mode} does not belong to any of these mode: ['zero', 'random', 'formula']")
 elif phase_mode == 'zero':
     print('Warning: Phase mode "zero" may lead to intermodulation!!!')
+print('===================================================')
 
 
+# generate single trap
 test = StaticTrap(ntrap=1, mode=phase_mode)
 test.amp = np.array([a_0])
 test.get_signal()
@@ -65,75 +66,7 @@ if adjust_a != 'y':
     exit()
 central_power = float(input('The power of the single trap (in mW): '))
 
-### Function
-def imcapture(filepath, gain=-1):
-    cap = EasyPySpin.VideoCapture(0)
-
-    if not cap.isOpened():
-        print("Camera can't open\nexit")
-        return -1
-
-    cap.set(cv2.CAP_PROP_EXPOSURE, -1)  # -1 sets exposure_time to auto
-    cap.set(cv2.CAP_PROP_GAIN, gain)  # -1 sets gain to auto
-
-    ret, frame = cap.read()
-    cv2.imwrite(filepath, frame)
-    cap.release()
-    cv2.destroyAllWindows()
-
-class Fitting():
-    def __init__(self, image, center, d):
-        self.center = center
-        self.d = d
-        self.image = image[center[0] - d//2: center[0] + d//2, center[1] - d//2: center[1] + d//2]
-        self.sat = self.check_saturation()
-
-    def check_saturation(self):
-        threshold = 254
-        saturated_mask = im >= threshold
-        saturated_per = np.sum(saturated_mask) / (im.shape[0] * im.shape[1]) * 100
-        if saturated_per > 1:
-            return True
-        else:
-            return False
-
-    def start_fit(self):
-        # return the fitted amplitude
-        def gaussian_2d(xy, amplitude, x_mean, y_mean, x_stddev, y_stddev, rotation):
-            x, y = xy
-            x_rot = (x - x_mean) * np.cos(rotation) - (y - y_mean) * np.sin(rotation)
-            y_rot = (x - x_mean) * np.sin(rotation) + (y - y_mean) * np.cos(rotation)
-            exponent = -((x_rot / x_stddev) ** 2 + (y_rot / y_stddev) ** 2) / 2
-            return amplitude * np.exp(exponent)
-
-        x = np.arange(self.image.shape[1])
-        y = np.arange(self.image.shape[0])
-        xx, yy = np.meshgrid(x, y)
-
-        xy = (xx.flatten(), yy.flatten())
-        data = self.image.flatten()
-
-        bounds = (0, [np.inf, np.inf, np.inf, np.inf, np.inf, 2 * np.pi])
-        popt, _ = curve_fit(gaussian_2d, xy, data, p0=[np.max(self.image), self.d//2, self.d//2, 10, 10, 0],
-                            bounds=bounds)
-        self.fitted_data = gaussian_2d((xx, yy), *popt).reshape(self.image.shape)
-
-        self.I0, self.sigma_x, self.sigma_y = popt[0], popt[3], popt[4]
-
-    def show_image(self):
-        plt.figure(figsize=(10, 5))
-
-        plt.subplot(1, 2, 1)
-        plt.imshow(self.image, cmap='viridis')
-        plt.title('Original Image')
-
-        plt.subplot(1, 2, 2)
-        plt.imshow(self.fitted_data, cmap='viridis')
-        plt.title(f'Fitted Gaussian with I0 = {self.I0:.2f}')
-
-        plt.tight_layout()
-        plt.show()
-
+# adjust ccd gain
 frame_width = 30 # the area where the trap locates is d^2
 gain = 10
 central_I0 = 0
@@ -157,6 +90,7 @@ while True:
 print('===================================================')
 
 # 2
+# Input params, generate multiple traps, and double check
 ntrap = int(input("Input the number of traps: "))
 spacing = float(input("Input the lattice spacing (in MHz): "))
 
@@ -177,6 +111,7 @@ print('===================================================')
 
 
 # 3
+# Start intensity optimization
 print('Intensity optimization start...')
 date = datetime.now().strftime('%y%m%d_%H:%M')
 im_folder = f'./IntOptD_{date}'
@@ -236,7 +171,7 @@ data = {
 
 init_amp = test.amp
 print('Optimization start...')
-for i in range(100):
+for i in range(25):
     print(f'Iteration {i+1}')
     imcapture(f'{im_folder}/opt_{i+1}')
     image = cv2.imread(f'{im_folder}/opt_{0}.png')
