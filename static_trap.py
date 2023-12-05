@@ -19,10 +19,11 @@ class StaticTrap:
         CENTRAL_FREQ = 75.0 # unit: MHz, denotes the frequency for the coordinate 0
         # setup: num of traps, {freq, amp, phase} of RF signals, E for total RF signal
         self.ntrap = ntrap
+        self.lattice_spacing = lattice_spacing
         self.duration = duration
         self.signal_length = R * duration
         self.time = np.linspace(0, duration, self.signal_length, endpoint=False)
-        self.freq = np.array([CENTRAL_FREQ - lattice_spacing * ((self.ntrap - 1)/2 - i) for i in range(self.ntrap)])
+        self.freq = np.array([CENTRAL_FREQ - self.lattice_spacing * ((self.ntrap - 1)/2 - i) for i in range(self.ntrap)])
         self.amp = np.array([0.1 for _ in range(self.ntrap)])
         self.phase = self.get_phase(mode)
 
@@ -47,7 +48,7 @@ class StaticTrap:
         elif mode == "formula":
             phase = np.array([0.0 for _ in range(self.ntrap)])  # phases obtained from a specific formula
             for i in range(self.ntrap):
-                k = self.freq[i] / lattice_spacing
+                k = self.freq[i] / self.lattice_spacing
                 phase[i] = 0.5 * np.pi * (k + 1 * (k ** 2) / self.ntrap)
         else:
             print("Error: mode must be one of these: 'zero', 'random', or 'formula'.")
@@ -57,7 +58,7 @@ class StaticTrap:
         for i in range(self.ntrap):
             self.signal += self.amp[i] * np.sin(2 * np.pi * self.freq[i] * self.time + self.phase[i])
 
-        self.filename = './Data/static_trap_signal_' + str(datetime.datetime.now().strftime("%Y%m%d_%H%M%S")) + '.json'
+        self.filename = 'C:/Users/Lab330/PycharmProjects/AtomArray/AWG_Control/Data/static_trap_signal_' + str(datetime.datetime.now().strftime("%Y%m%d_%H%M%S")) + '.json'
         with open(self.filename, 'w') as f:
             json.dump(self.signal.tolist(), f)
 

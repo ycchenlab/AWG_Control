@@ -17,6 +17,9 @@ Procedure:
     d. (Auto) Feed the new RF amplitude into AOD and (b), (c) iteratively. Once the stdev of intensity < 0.5, save the data and quit.
 '''
 
+import sys
+sys.path.insert(1, '../')
+
 from static_trap import StaticTrap
 from IntOptFnc import *
 from complete_control_dev_class import AWG
@@ -54,14 +57,14 @@ test.amp = np.array([a_0])
 test.get_signal()
 
 with open(test.filename, 'r') as f:
-    d = json.load(f)
+    signal = json.load(f)
 
 # threading
 stop_awg_flag = False
 def perform_awg():
-    global stop_awg_flag, test
+    global stop_awg_flag
     awg = AWG(time=test.duration)
-    awg.transfer_data(50, d, 0)
+    awg.transfer_data(50, signal, 0)
     awg.execute()
     while not stop_awg_flag:
         pass
@@ -83,7 +86,7 @@ central_power = float(input('The power of the single trap (in mW): '))
 
 # adjust ccd gain
 frame_width = 30 # the area where the trap locates is d^2
-gain = 10
+gain = 1
 central_I0 = 0
 print('Adjusting ccd gain...')
 while True:
@@ -91,7 +94,7 @@ while True:
     im = np.array(Image.open(f'single_trap.png'))
     os.remove('single_trap.png')
 
-    r = Fitting(im, [im.shape[0], im.shape[1]], frame_width)
+    r = Fitting(im, [im.shape[0]//2, im.shape[1]//2], frame_width)
     r.start_fit()
     if r.I0 < 150:
         gain += 1
@@ -99,7 +102,7 @@ while True:
         gain -= 1
     else:
         central_I0 = r.I0
-        print(f'Peak intensity (0~255): {central_I0}')
+        print(f'Set gain = {gain}. Peak intensity (0~255): {central_I0}')
         r.show_image()
         break
 
@@ -115,15 +118,27 @@ ntrap = int(input("Input the number of traps: "))
 spacing = float(input("Input the lattice spacing (in MHz): "))
 
 time.sleep(2)
-test = StaticTrap(ntrap=ntrap, lattice_spacing=spacing, mode=phase_mode)
-test.amp = np.array([a_0 for _ in range(ntrap)])
-test.get_signal()
+test_2 = StaticTrap(ntrap=ntrap, lattice_spacing=spacing, mode=phase_mode)
+test_2.amp = np.array([a_0 for _ in range(ntrap)])
+test_2.get_signal()
 
-with open(test.filename, 'r') as f:
-    signal = json.load(f)
+with open(test_2.filename, 'r') as f:
+    signal_2 = json.load(f)
 
-awg_thread = threading.Thread(target=perform_awg)
-awg_thread.start()
+
+stop_awg_flag_2 = False
+def perform_awg_2():
+    global stop_awg_flag_2
+    awg = AWG(time=test_2.duration)
+    awg.transfer_data(50, signal_2, 0)
+    awg.execute()
+    while not stop_awg_flag_2:
+        pass
+    awg.stop_AWG()
+    stop_awg_flag = False
+
+awg_thread_2 = threading.Thread(target=perform_awg_2)
+awg_thread_2.start()
 
 # awg = AWG(time=test.duration)
 # awg.transfer_data(50, signal, 0)
@@ -138,7 +153,7 @@ print('===================================================')
 # Start intensity optimization
 print('Intensity optimization start...')
 date = datetime.now().strftime('%y%m%d_%H:%M')
-im_folder = f'./IntOptD_{date}'
+im_folder = f'C:/Users/Lab330/PycharmProjects/AtomArray/AWG_Control/IntOpt/IntOptD_{date}'
 os.makedirs(im_folder)
 
 # find local maxima
