@@ -207,4 +207,5 @@ class AWG:
     def stop_AWG(self):
         spcm_dwSetParam_i32(self.hCard, SPC_M2CMD, M2CMD_CARD_STOP)
         spcm_vClose(self.hCard)
+        # exit
 
