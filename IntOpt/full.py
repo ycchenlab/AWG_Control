@@ -23,6 +23,7 @@ from complete_control_dev_class import AWG
 import cv2
 import os
 import sys
+import time
 import threading
 import json
 import numpy as np
@@ -47,6 +48,7 @@ print('===================================================')
 
 
 # generate single trap
+time.sleep(2)
 test = StaticTrap(ntrap=1, mode=phase_mode)
 test.amp = np.array([a_0])
 test.get_signal()
@@ -112,6 +114,7 @@ print('===================================================')
 ntrap = int(input("Input the number of traps: "))
 spacing = float(input("Input the lattice spacing (in MHz): "))
 
+time.sleep(2)
 test = StaticTrap(ntrap=ntrap, lattice_spacing=spacing, mode=phase_mode)
 test.amp = np.array([a_0 for _ in range(ntrap)])
 test.get_signal()
@@ -173,6 +176,8 @@ plt.scatter(trap_positions[:, 0], trap_positions[:, 1], color='red', marker='o')
 plt.show()
 if trap_positions.shape[0] != ntrap:
     raise Exception(f'Number of local maxima ({trap_positions.shape[0]}) does not match the number of traps ({ntrap})!!!')
+print('Press enter to continue...')
+input()
 
 # create a dict to store information
 data = {
@@ -221,6 +226,7 @@ for i in range(25):
     awg_thread.join()
 
     # generate net trap:
+    time.sleep(2)
     test = StaticTrap(ntrap=ntrap, lattice_spacing=spacing, mode=phase_mode)
     test.amp = init_amp
     test.get_signal()
