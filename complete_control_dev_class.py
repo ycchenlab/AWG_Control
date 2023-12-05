@@ -195,12 +195,16 @@ class AWG:
         # press esc to end this program
         sys.stdout.write ("\n key: ESC ... stop replay and end program\n\n")
 
-        def lKbhit():
-            return ord(msvcrt.getch()) if msvcrt.kbhit() else 0
-        while True:
-            lKey = lKbhit ()
-            if lKey == 27: # ESC
-                spcm_dwSetParam_i32 (self.hCard, SPC_M2CMD, M2CMD_CARD_STOP)
-                break
-        spcm_vClose (self.hCard);
+        # def lKbhit():
+        #     return ord(msvcrt.getch()) if msvcrt.kbhit() else 0
+        # while True:
+        #     lKey = lKbhit ()
+        #     if lKey == 27: # ESC
+        #         spcm_dwSetParam_i32 (self.hCard, SPC_M2CMD, M2CMD_CARD_STOP)
+        #         break
+        # spcm_vClose (self.hCard);
+
+    def stop_AWG(self):
+        spcm_dwSetParam_i32(self.hCard, SPC_M2CMD, M2CMD_CARD_STOP)
+        spcm_vClose(self.hCard)
 

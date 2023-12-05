@@ -23,6 +23,7 @@ from complete_control_dev_class import AWG
 import cv2
 import os
 import sys
+import threading
 import json
 import numpy as np
 import matplotlib.pyplot as plt
@@ -53,9 +54,21 @@ test.get_signal()
 with open(test.filename, 'r') as f:
     d = json.load(f)
 
-awg = AWG(time=test.duration)
-awg.transfer_data(50, d, 0)
-awg.execute()
+# threading
+stop_awg_flag = False
+def perform_awg():
+    global stop_awg_flag, test
+    awg = AWG(time=test.duration)
+    awg.transfer_data(50, d, 0)
+    awg.execute()
+    while not stop_awg_flag:
+        pass
+    awg.stop_AWG()
+    stop_awg_flag = False
+
+awg_thread = threading.Thread(target=perform_awg)
+awg_thread.start()
+
 print('Single trap generated!')
 print('===================================================')
 
@@ -87,6 +100,11 @@ while True:
         print(f'Peak intensity (0~255): {central_I0}')
         r.show_image()
         break
+
+# stop AWG
+stop_awg_flag = True
+awg_thread.join()
+print('AWG closed')
 print('===================================================')
 
 # 2
@@ -101,9 +119,12 @@ test.get_signal()
 with open(test.filename, 'r') as f:
     signal = json.load(f)
 
-awg = AWG(time=test.duration)
-awg.transfer_data(50, signal, 0)
-awg.execute()
+awg_thread = threading.Thread(target=perform_awg)
+awg_thread.start()
+
+# awg = AWG(time=test.duration)
+# awg.transfer_data(50, signal, 0)
+# awg.execute()
 
 print('Adjust the gain to 24 in SpinView, and check if there is any strange pattern. \n Press enter to continue...')
 input()
@@ -196,6 +217,9 @@ for i in range(25):
 
     init_amp = np.array([init_amp[k] + 0.1 * (central_I0 - intensity[k]) / central_I0 * init_amp[k] for k in range(ntrap)])
 
+    stop_awg_flag = True
+    awg_thread.join()
+
     # generate net trap:
     test = StaticTrap(ntrap=ntrap, lattice_spacing=spacing, mode=phase_mode)
     test.amp = init_amp
@@ -204,9 +228,11 @@ for i in range(25):
     with open(test.filename, 'r') as f:
         signal = json.load(f)
 
-    awg = AWG(time=test.duration)
-    awg.transfer_data(50, signal, 0)
-    awg.execute()
+    awg_thread  = threading.Thread(target=perform_awg)
+    awg_thread.start()
+    # awg = AWG(time=test.duration)
+    # awg.transfer_data(50, signal, 0)
+    # awg.execute()
 
     # store the data
     data[f'iteration_{i+1}'] = {
@@ -219,6 +245,9 @@ for i in range(25):
         'new_amp': np.ndarray.tolist(init_amp)
     }
 
+
+stop_awg_flag = True
+awg_thread.join()
 print('Optimization end. May not complete')
 with open(f'{im_folder}/opt_log.json', 'w') as f:
     json.dump(data, f)
